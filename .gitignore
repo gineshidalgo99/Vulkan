@@ -1,0 +1,44 @@
+# -------------------------- Automatic ignored files and folders -------------------------- #
+
+# ------------------------------------- Older versions ------------------------------------ #
+stable/
+
+# --------------------------------- Personal ignored files -------------------------------- #
+*.user
+*.7z
+*.dll
+
+# -------------------------------- Personal ignored folders ------------------------------- #
+build_windows/
+Eigen/
+models/
+GLFW/
+glm/
+opencv/
+opencv2/
+bin/
+lib/
+
+# -------------------------------- Visual Studio 2015 Files ------------------------------- #
+debug/
+release/
+*.idb
+*.ilk
+*.iobj
+*.ipdb
+*.opendb
+*.pdb
+*.sdf
+*.suo
+*.tlog
+*vcxproj*
+
+# Git terminal commands required after ignore a file/folder:
+# Found in: http://stackoverflow.com/questions/4308610/how-to-ignore-certain-files-in-git
+# git rm -rf --cached .
+# git add .
+# git commit -m ".gitignore updated"
+# git push
+
+# Delete up to specific commit (it deletes the commmit, no the physical data)
+# git reset --soft {number_of_the_commit}
