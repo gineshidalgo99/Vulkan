@@ -2,8 +2,10 @@
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_INLINE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -129,7 +131,7 @@ struct SwapChainSupportDetails {
 };
 
 struct Vertex {
-	glm::vec2 pos;
+	glm::vec3 pos;
 	glm::vec3 color;
 	glm::vec2 texCoord;
 
@@ -149,7 +151,7 @@ struct Vertex {
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 		attributeDescriptions[1].binding = 0;
@@ -174,19 +176,14 @@ struct UniformBufferObject
 };
 
 const std::vector<Vertex> vertices = {
-	//{ { -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
-	//{ { 0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } },
-	//{ { 0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f } },
-	//{ { -0.5f, 0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f } }
-	{ { -1.f, -1.f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
-	{ { 1.f, -1.f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } },
-	{ { 1.f, 1.f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f } },
-	{ { -1.f, 1.f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f } }
+	{ { -1.f, -1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
+	{ { 1.f, -1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } },
+	{ { 1.f, 1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } },
+	{ { -1.f, 1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } }
 };
 
 const std::vector<uint16_t> indices = {
 	0, 1, 2, 2, 3, 0
-	//0, 1, 2, 3, 0
 };
 
 class VulkanBlendingApplication
@@ -1164,13 +1161,24 @@ class VulkanBlendingApplication
 			float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
 
 			UniformBufferObject ubo;
-			//ubo.model = glm::mat4(1.0);
-			//ubo.view = glm::lookAt(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			//ubo.proj = glm::mat4(1.0);
-			ubo.model = glm::rotate(glm::mat4(), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
-			ubo.proj[1][1] *= -1;
+			ubo.model = glm::mat4();
+			ubo.view = glm::mat4(1, 0, 0, 0,	0, 1, 0, 0,		0, 0, 1, 0,		0, 0, -1, -1);
+			ubo.proj = glm::mat4(1, 0, 0, 0,	0, -1, 0, 0,	0, 0, -1, -1,	0, 0, 0, 0);
+			//ubo.model = glm::mat4();
+			//ubo.model = glm::rotate(glm::mat4(), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			//ubo.view = glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			//ubo.proj = glm::perspective(glm::radians(22.5f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+			//ubo.proj[1][1] *= -1;
+			//std::cout << glm::to_string(ubo.proj) << std::endl;
+			//const auto mvp = ubo.model * ubo.view * ubo.proj;
+			const auto mvp = ubo.proj * ubo.view * ubo.model;
+			for (auto i = 0; i < 4; i++)
+				std::cout << glm::to_string(mvp[i]) << std::endl;
+			const auto point = glm::vec4(-1.f, -1.f, 0.f, 1.f);
+			//std::cout << glm::to_string(point) << std::endl;
+			std::cout << glm::to_string(mvp * point) << std::endl;
+			//std::cout << glm::to_string(point * mvp) << std::endl;
+			std::cout << std::endl;
 
 			void* data;
 			vkMapMemory(device, uniformStagingBufferMemory, 0, sizeof(ubo), 0, &data);
