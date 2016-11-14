@@ -797,12 +797,36 @@ std::cout << "loop total time ms = " << loopTotalTimeMs << std::endl;
 
 		void updateImage()
 		{
+			//int texWidth, texHeight;
+			//cv::Mat pixelsBGR = cv::imread("textures/texture.jpg");
+			//if (pixelsBGR.empty())
+			//	throw std::runtime_error("failed to load texture image!");
+			//// BGR to RGB
+			//cv::Mat pixelsRGBA;
+			//// RGB to RGBA
+			//cv::cvtColor(pixelsBGR, pixelsRGBA, CV_BGR2RGBA);
+			//texWidth = pixelsBGR.cols;
+			//texHeight = pixelsBGR.rows;
+			//VkDeviceSize imageSize = texWidth * texHeight * 4;
 
+			//VDeleter<VkImage> stagingImage{ device, vkDestroyImage };
+			//VDeleter<VkDeviceMemory> stagingImageMemory{ device, vkFreeMemory };
+			//createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingImage, stagingImageMemory);
 
+			//void* data;
+			//vkMapMemory(device, stagingImageMemory, 0, imageSize, 0, &data);
+			//memcpy(data, pixelsRGBA.data, (size_t)imageSize);
+			//vkUnmapMemory(device, stagingImageMemory);
 
+			////createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
+			////transitionImageLayout(stagingImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+			////transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			////copyImage(stagingImage, textureImage, texWidth, texHeight);
 
+			////transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
+			//recreateSwapChain();
 		}
 
 		void createTextureImageView() {
