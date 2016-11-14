@@ -9,21 +9,17 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <iostream>
-#include <stdexcept>
-#include <functional>
-#include <chrono>
-#include <fstream>
 #include <algorithm>
-#include <vector>
-#include <cstring>
 #include <array>
+#include <chrono>
+#include <cstring>
+#include <fstream>
+#include <functional>
+#include <iostream>
 #include <set>
-
-const int WIDTH = 1280;
-const int HEIGHT = 720;
-//const int WIDTH = 1920;
-//const int HEIGHT = 1080;
+#include <stdexcept>
+#include <thread>
+#include <vector>
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_LUNARG_standard_validation"
@@ -176,10 +172,10 @@ struct UniformBufferObject
 };
 
 const std::vector<Vertex> vertices = {
-	{ { -1.f, -1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
-	{ { 1.f, -1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } },
-	{ { 1.f, 1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } },
-	{ { -1.f, 1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } }
+	{ { -1.f, -1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } },
+	{ { 1.f, -1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
+	{ { 1.f, 1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
+	{ { -1.f, 1.f, 0.f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } }
 };
 
 const std::vector<uint16_t> indices = {
@@ -252,7 +248,16 @@ class VulkanBlendingApplication
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-			window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+			// No full screen mode
+			//window = glfwCreateWindow(1920, 1080, "Vulkan", nullptr, nullptr);
+			// Full screen mode
+			const auto monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+			glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+			glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+			glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+			window = glfwCreateWindow(mode->width, mode->height, "Vulkan", monitor, NULL);
 
 			glfwSetWindowUserPointer(window, this);
 			glfwSetWindowSizeCallback(window, VulkanBlendingApplication::onWindowResized);
@@ -282,16 +287,51 @@ class VulkanBlendingApplication
 			createDescriptorSet();
 			createCommandBuffers();
 			createSemaphores();
+			updateUniformBuffer();
 		}
 
 		void mainLoop()
 		{
+			const auto fps = 61;
+			const auto millisecondsPerFrame = 1000. / fps;
+
+			//auto timeToSleepMs = 0.001;
 			while (!glfwWindowShouldClose(window))
 			{
-				glfwPollEvents();
+				const auto beginClock = std::chrono::high_resolution_clock::now();
+				//glfwWaitEventsTimeout(timeToSleepMs);
 
-				updateUniformBuffer();
+				updateImage();	// Function to be done, not finished
+				//updateUniformBuffer();
 				drawFrame();
+
+				// Measure performance
+				const auto durationMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+
+				// Process current events
+				// Option a - Just process all current queued events
+				const auto durationInnerLoopMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				const auto otherEventsTimeMs = (millisecondsPerFrame - durationInnerLoopMs) * 0.5;
+				if (otherEventsTimeMs > 0)
+					glfwWaitEventsTimeout(otherEventsTimeMs * 1e-3);
+				else
+					glfwPollEvents();
+				const auto durationSoFar = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				const auto timeToSleepMs = -(millisecondsPerFrame - durationSoFar - 1.5);
+				if (timeToSleepMs > 0)
+					std::this_thread::sleep_for(std::chrono::microseconds{ (int)std::round(1e3 * timeToSleepMs) });
+				// Option b - Just process all current queued events
+				//glfwPollEvents();	// Process all queued events
+
+				// Loop total time
+				const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+//std::cout << durationInnerLoopMs << "\n";
+//std::cout << millisecondsPerFrame << "\n";
+//std::cout << otherEventsTimeMs << "\n";
+//std::cout << durationSoFar << "\n";
+//std::cout << timeToSleepMs << "\n";
+//std::cout << "loop total time ms = " << loopTotalTimeMs << "\n" << std::endl;
+std::cout << "loop total time ms = " << loopTotalTimeMs << std::endl;
 			}
 
 			vkDeviceWaitIdle(device);
@@ -498,9 +538,8 @@ class VulkanBlendingApplication
 		{
 			swapChainImageViews.resize(swapChainImages.size(), VDeleter<VkImageView>{device, vkDestroyImageView});
 
-			for (uint32_t i = 0; i < swapChainImages.size(); i++) {
+			for (uint32_t i = 0; i < swapChainImages.size(); i++)
 				createImageView(swapChainImages[i], swapChainImageFormat, swapChainImageViews[i]);
-			}
 		}
 
 		void createRenderPass()
@@ -732,6 +771,7 @@ class VulkanBlendingApplication
 				throw std::runtime_error("failed to load texture image!");
 			// BGR to RGB
 			cv::Mat pixelsRGBA;
+			// RGB to RGBA
 			cv::cvtColor(pixelsBGR, pixelsRGBA, CV_BGR2RGBA);
 			texWidth = pixelsBGR.cols;
 			texHeight = pixelsBGR.rows;
@@ -753,6 +793,16 @@ class VulkanBlendingApplication
 			copyImage(stagingImage, textureImage, texWidth, texHeight);
 
 			transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		}
+
+		void updateImage()
+		{
+
+
+
+
+
+
 		}
 
 		void createTextureImageView() {
@@ -1155,30 +1205,10 @@ class VulkanBlendingApplication
 
 		void updateUniformBuffer()
 		{
-			static auto startTime = std::chrono::high_resolution_clock::now();
-
-			auto currentTime = std::chrono::high_resolution_clock::now();
-			float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
-
 			UniformBufferObject ubo;
-			ubo.model = glm::mat4();
-			ubo.view = glm::mat4(1, 0, 0, 0,	0, 1, 0, 0,		0, 0, 1, 0,		0, 0, -1, -1);
-			ubo.proj = glm::mat4(1, 0, 0, 0,	0, -1, 0, 0,	0, 0, -1, -1,	0, 0, 0, 0);
-			//ubo.model = glm::mat4();
-			//ubo.model = glm::rotate(glm::mat4(), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			//ubo.view = glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			//ubo.proj = glm::perspective(glm::radians(22.5f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
-			//ubo.proj[1][1] *= -1;
-			//std::cout << glm::to_string(ubo.proj) << std::endl;
-			//const auto mvp = ubo.model * ubo.view * ubo.proj;
-			const auto mvp = ubo.proj * ubo.view * ubo.model;
-			for (auto i = 0; i < 4; i++)
-				std::cout << glm::to_string(mvp[i]) << std::endl;
-			const auto point = glm::vec4(-1.f, -1.f, 0.f, 1.f);
-			//std::cout << glm::to_string(point) << std::endl;
-			std::cout << glm::to_string(mvp * point) << std::endl;
-			//std::cout << glm::to_string(point * mvp) << std::endl;
-			std::cout << std::endl;
+			ubo.model = glm::mat4(1.f);
+			ubo.view = glm::mat4(1.f);
+			ubo.proj = glm::mat4(-1, 0, 0, 0,	0, 1, 0, 0,	0, 0, 0, 1,	0, 0, 0, 1);
 
 			void* data;
 			vkMapMemory(device, uniformStagingBufferMemory, 0, sizeof(ubo), 0, &data);
@@ -1274,17 +1304,18 @@ class VulkanBlendingApplication
 
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 		{
-			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-				return capabilities.currentExtent;
-			else
-			{
-				VkExtent2D actualExtent = { WIDTH, HEIGHT };
+			return capabilities.currentExtent;
+			//if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+			//	return capabilities.currentExtent;
+			//else
+			//{
+			//	VkExtent2D actualExtent = { WIDTH, HEIGHT };
 
-				actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
-				actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+			//	actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+			//	actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
 
-				return actualExtent;
-			}
+			//	return actualExtent;
+			//}
 		}
 
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device)
@@ -1461,6 +1492,6 @@ int main() {
 		result = EXIT_FAILURE;
 	}
 
-	system("pause");
+	//system("pause");
 	return result;
 }
