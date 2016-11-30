@@ -363,7 +363,7 @@
 //				//// Loop total time
 //				//const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
 //
-//				//// Debuggin times
+//				//// Debugging times
 //				////std::cout << durationInnerLoopMs << "\n";
 //				////std::cout << millisecondsPerFrame << "\n";
 //				////std::cout << otherEventsTimeMs << "\n";

@@ -329,38 +329,38 @@ std::cout << "end bottelnecks" << std::endl;
 			const auto millisecondsPerFrame = 1000. / fps;
 			while (!glfwWindowShouldClose(window))
 			{
-				glfwPollEvents();
+				//glfwPollEvents();
 
-				updateUniformBuffer();
-				drawFrame();
-
-				//const auto beginClock = std::chrono::high_resolution_clock::now();
-
-				////updateImage();	// Function to be done, not finished
+				//updateUniformBuffer();
 				//drawFrame();
 
-				//// Measure performance
-				//const auto durationMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				const auto beginClock = std::chrono::high_resolution_clock::now();
 
-				//// Process current events
-				//// Option a - Just process all current queued events
-				//const auto durationInnerLoopMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
-				//const auto otherEventsTimeMs = (millisecondsPerFrame - durationInnerLoopMs) * 0.5;
-				//if (otherEventsTimeMs > 0)
-				//	glfwWaitEventsTimeout(otherEventsTimeMs * 1e-3);
-				//else
-				//	glfwPollEvents();
-				//const auto durationSoFar = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
-				//const auto timeToSleepMs = -(millisecondsPerFrame - durationSoFar - 1.5);
-				//if (timeToSleepMs > 0)
-				//	std::this_thread::sleep_for(std::chrono::microseconds{ (int)std::round(1e3 * timeToSleepMs) });
-				//// Option b - Just process all current queued events
-				////glfwPollEvents();	// Process all queued events
+				//updateImage();	// Function to be done, not finished
+				drawFrame();
 
-				//// Loop total time
-				//const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				// Measure performance
+				const auto durationMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
 
-				//// Debuggin times
+				// Process current events
+				// Option a - Just process all current queued events
+				const auto durationInnerLoopMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				const auto otherEventsTimeMs = (millisecondsPerFrame - durationInnerLoopMs) * 0.5;
+				if (otherEventsTimeMs > 0)
+					glfwWaitEventsTimeout(otherEventsTimeMs * 1e-3);
+				else
+					glfwPollEvents();
+				const auto durationSoFar = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				const auto timeToSleepMs = -(millisecondsPerFrame - durationSoFar - 1.5);
+				if (timeToSleepMs > 0)
+					std::this_thread::sleep_for(std::chrono::microseconds{ (int)std::round(1e3 * timeToSleepMs) });
+				// Option b - Just process all current queued events
+				//glfwPollEvents();	// Process all queued events
+
+				// Loop total time
+				const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+
+				//// Debugging times
 				////std::cout << durationInnerLoopMs << "\n";
 				////std::cout << millisecondsPerFrame << "\n";
 				////std::cout << otherEventsTimeMs << "\n";
