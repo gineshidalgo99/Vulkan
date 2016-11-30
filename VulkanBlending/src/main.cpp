@@ -95,7 +95,8 @@ class VDeleter
 		}
 
 		template<typename V>
-		bool operator==(V rhs) {
+		bool operator==(V rhs)
+		{
 			return object == T(rhs);
 		}
 
@@ -103,10 +104,10 @@ class VDeleter
 		T object{ VK_NULL_HANDLE };
 		std::function<void(T)> deleter;
 
-		void cleanup() {
-			if (object != VK_NULL_HANDLE) {
+		void cleanup()
+		{
+			if (object != VK_NULL_HANDLE)
 				deleter(object);
-			}
 			object = VK_NULL_HANDLE;
 		}
 };
@@ -121,20 +122,22 @@ struct QueueFamilyIndices
 	}
 };
 
-struct SwapChainSupportDetails {
+struct SwapChainSupportDetails
+{
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
-struct Vertex {
+struct Vertex
+{
 	glm::vec3 pos;
-	glm::vec4 color;
+	glm::vec3 color;
 	glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription()
 	{
-		VkVertexInputBindingDescription bindingDescription;
+		VkVertexInputBindingDescription bindingDescription = {};
 		bindingDescription.binding = 0;
 		bindingDescription.stride = sizeof(Vertex);
 		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -144,7 +147,7 @@ struct Vertex {
 
 	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions()
 	{
-		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions;
+		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
@@ -174,20 +177,30 @@ struct UniformBufferObject
 
 const std::vector<Vertex> vertices = {
 	// Image 1
-	{ { 0.f, -1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
-	{ { 1.f, -1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
-	{ { 1.f, 1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
-	{ { 0.f, 1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
+	{ { -0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
+	{ { 0.5f, -0.5f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } },
+	{ { 0.5f, 0.5f, 0.0f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f } },
+	{ { -0.5f, 0.5f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f } },
 	// Image 2
-	{ { -1.f, -1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.f, 0.0f } },
-	{ { 1.f, -1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
-	{ { 1.f, 1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
-	{ { -1.f, 1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.f, 1.0f } },
+	{ { -0.5f, -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
+	{ { 0.5f, -0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } },
+	{ { 0.5f, 0.5f, -0.5f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f } },
+	{ { -0.5f, 0.5f, -0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f } }
+	//// Image 1
+	//{ { 0.f, -1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
+	//{ { 1.f, -1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
+	//{ { 1.f, 1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
+	//{ { 0.f, 1.f, 0.4f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
+	//// Image 2
+	//{ { -1.f, -1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.f, 0.0f } },
+	//{ { 1.f, -1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
+	//{ { 1.f, 1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
+	//{ { -1.f, 1.f, 0.5f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.f, 1.0f } },
 };
 
 const std::vector<uint16_t> indices = {
-	4, 5, 6, 6, 7, 4,
 	0, 1, 2, 2, 3, 0,
+	4, 5, 6, 6, 7, 4
 };
 
 class VulkanBlendingApplication
@@ -316,44 +329,47 @@ std::cout << "end bottelnecks" << std::endl;
 		{
 			const auto fps = 61;
 			const auto millisecondsPerFrame = 1000. / fps;
-
-			//auto timeToSleepMs = 0.001;
 			while (!glfwWindowShouldClose(window))
 			{
-				const auto beginClock = std::chrono::high_resolution_clock::now();
+				glfwPollEvents();
 
-				//updateImage();	// Function to be done, not finished
+				updateUniformBuffer();
 				drawFrame();
 
-				// Measure performance
-				const auto durationMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				//const auto beginClock = std::chrono::high_resolution_clock::now();
 
-				// Process current events
-				// Option a - Just process all current queued events
-				const auto durationInnerLoopMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
-				const auto otherEventsTimeMs = (millisecondsPerFrame - durationInnerLoopMs) * 0.5;
-				if (otherEventsTimeMs > 0)
-					glfwWaitEventsTimeout(otherEventsTimeMs * 1e-3);
-				else
-					glfwPollEvents();
-				const auto durationSoFar = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
-				const auto timeToSleepMs = -(millisecondsPerFrame - durationSoFar - 1.5);
-				if (timeToSleepMs > 0)
-					std::this_thread::sleep_for(std::chrono::microseconds{ (int)std::round(1e3 * timeToSleepMs) });
-				// Option b - Just process all current queued events
-				//glfwPollEvents();	// Process all queued events
+				////updateImage();	// Function to be done, not finished
+				//drawFrame();
 
-				// Loop total time
-				const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				//// Measure performance
+				//const auto durationMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
 
-				// Debuggin times
-				//std::cout << durationInnerLoopMs << "\n";
-				//std::cout << millisecondsPerFrame << "\n";
-				//std::cout << otherEventsTimeMs << "\n";
-				//std::cout << durationSoFar << "\n";
-				//std::cout << timeToSleepMs << "\n";
-				//std::cout << "loop total time ms = " << loopTotalTimeMs << "\n" << std::endl;
-				std::cout << "loop total time ms = " << loopTotalTimeMs << std::endl;
+				//// Process current events
+				//// Option a - Just process all current queued events
+				//const auto durationInnerLoopMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				//const auto otherEventsTimeMs = (millisecondsPerFrame - durationInnerLoopMs) * 0.5;
+				//if (otherEventsTimeMs > 0)
+				//	glfwWaitEventsTimeout(otherEventsTimeMs * 1e-3);
+				//else
+				//	glfwPollEvents();
+				//const auto durationSoFar = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+				//const auto timeToSleepMs = -(millisecondsPerFrame - durationSoFar - 1.5);
+				//if (timeToSleepMs > 0)
+				//	std::this_thread::sleep_for(std::chrono::microseconds{ (int)std::round(1e3 * timeToSleepMs) });
+				//// Option b - Just process all current queued events
+				////glfwPollEvents();	// Process all queued events
+
+				//// Loop total time
+				//const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6);
+
+				//// Debuggin times
+				////std::cout << durationInnerLoopMs << "\n";
+				////std::cout << millisecondsPerFrame << "\n";
+				////std::cout << otherEventsTimeMs << "\n";
+				////std::cout << durationSoFar << "\n";
+				////std::cout << timeToSleepMs << "\n";
+				////std::cout << "loop total time ms = " << loopTotalTimeMs << "\n" << std::endl;
+				//std::cout << "loop total time ms = " << loopTotalTimeMs << std::endl;
 			}
 
 			vkDeviceWaitIdle(device);
@@ -386,9 +402,9 @@ std::cout << "end bottelnecks" << std::endl;
 			if (enableValidationLayers && !checkValidationLayerSupport())
 				throw std::runtime_error("validation layers requested, but not available!");
 
-			VkApplicationInfo appInfo;
+			VkApplicationInfo appInfo = {};
 			appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-			appInfo.pApplicationName = "Vulkan Blending";
+			appInfo.pApplicationName = "Hello Triangle";
 			appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 			appInfo.pEngineName = "No Engine";
 			appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -398,13 +414,13 @@ std::cout << "end bottelnecks" << std::endl;
 			createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 			createInfo.pApplicationInfo = &appInfo;
 
-			const auto extensions = getRequiredExtensions();
-			createInfo.enabledExtensionCount = static_cast<int>(extensions.size());
+			auto extensions = getRequiredExtensions();
+			createInfo.enabledExtensionCount = extensions.size();
 			createInfo.ppEnabledExtensionNames = extensions.data();
 
 			if (enableValidationLayers)
 			{
-				createInfo.enabledLayerCount = static_cast<int>(validationLayers.size());
+				createInfo.enabledLayerCount = validationLayers.size();
 				createInfo.ppEnabledLayerNames = validationLayers.data();
 			}
 			else
@@ -416,7 +432,8 @@ std::cout << "end bottelnecks" << std::endl;
 
 		void setupDebugCallback()
 		{
-			if (!enableValidationLayers) return;
+			if (!enableValidationLayers)
+				return;
 
 			VkDebugReportCallbackCreateInfoEXT createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -485,12 +502,12 @@ std::cout << "end bottelnecks" << std::endl;
 
 			createInfo.pEnabledFeatures = &deviceFeatures;
 
-			createInfo.enabledExtensionCount = static_cast<int>(deviceExtensions.size());
+			createInfo.enabledExtensionCount = deviceExtensions.size();
 			createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 			if (enableValidationLayers)
 			{
-				createInfo.enabledLayerCount = static_cast<int>(validationLayers.size());
+				createInfo.enabledLayerCount = validationLayers.size();
 				createInfo.ppEnabledLayerNames = validationLayers.data();
 			}
 			else
@@ -645,7 +662,7 @@ std::cout << "end bottelnecks" << std::endl;
 			std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 			VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 			layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			layoutInfo.bindingCount = static_cast<int>(bindings.size());
+			layoutInfo.bindingCount = bindings.size();
 			layoutInfo.pBindings = bindings.data();
 
 			if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, descriptorSetLayout.replace()) != VK_SUCCESS)
@@ -683,7 +700,7 @@ std::cout << "end bottelnecks" << std::endl;
 			auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
 			vertexInputInfo.vertexBindingDescriptionCount = 1;
-			vertexInputInfo.vertexAttributeDescriptionCount = static_cast<int>(attributeDescriptions.size());
+			vertexInputInfo.vertexAttributeDescriptionCount = attributeDescriptions.size();
 			vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 			vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
@@ -815,7 +832,8 @@ std::cout << "end bottelnecks" << std::endl;
 				throw std::runtime_error("failed to create graphics command pool!");
 		}
 
-		void createDepthResources() {
+		void createDepthResources()
+		{
 			VkFormat depthFormat = findDepthFormat();
 
 			createImage(swapChainExtent.width, swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
@@ -826,16 +844,15 @@ std::cout << "end bottelnecks" << std::endl;
 
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 		{
-			for (VkFormat format : candidates) {
+			for (VkFormat format : candidates)
+			{
 				VkFormatProperties props;
 				vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
-				if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+				if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
 					return format;
-				}
-				else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+				else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
 					return format;
-				}
 			}
 
 			throw std::runtime_error("failed to find supported format!");
@@ -954,11 +971,13 @@ std::cout << "end bottelnecks" << std::endl;
 			//recreateSwapChain();
 		}
 
-		void createTextureImageView() {
+		void createTextureImageView()
+		{
 			createImageView(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, textureImageView);
 		}
 
-		void createTextureSampler() {
+		void createTextureSampler()
+		{
 			VkSamplerCreateInfo samplerInfo = {};
 			samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 			samplerInfo.magFilter = VK_FILTER_LINEAR;
@@ -995,7 +1014,8 @@ std::cout << "end bottelnecks" << std::endl;
 				throw std::runtime_error("failed to create texture image view!");
 		}
 
-		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VDeleter<VkImage>& image, VDeleter<VkDeviceMemory>& imageMemory) {
+		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VDeleter<VkImage>& image, VDeleter<VkDeviceMemory>& imageMemory)
+		{
 			VkImageCreateInfo imageInfo = {};
 			imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 			imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -1028,7 +1048,8 @@ std::cout << "end bottelnecks" << std::endl;
 			vkBindImageMemory(device, image, imageMemory, 0);
 		}
 
-		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+		{
 			VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 			VkImageMemoryBarrier barrier = {};
@@ -1089,7 +1110,8 @@ std::cout << "end bottelnecks" << std::endl;
 			endSingleTimeCommands(commandBuffer);
 		}
 
-		void copyImage(VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height) {
+		void copyImage(VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height)
+		{
 			VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 			VkImageSubresourceLayers subResource = {};
@@ -1117,7 +1139,8 @@ std::cout << "end bottelnecks" << std::endl;
 			endSingleTimeCommands(commandBuffer);
 		}
 
-		void createVertexBuffer() {
+		void createVertexBuffer()
+		{
 			VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 			VDeleter<VkBuffer> stagingBuffer{ device, vkDestroyBuffer };
@@ -1134,7 +1157,8 @@ std::cout << "end bottelnecks" << std::endl;
 			copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 		}
 
-		void createIndexBuffer() {
+		void createIndexBuffer()
+		{
 			VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
 			VDeleter<VkBuffer> stagingBuffer{ device, vkDestroyBuffer };
@@ -1159,7 +1183,8 @@ std::cout << "end bottelnecks" << std::endl;
 			createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, uniformBuffer, uniformBufferMemory);
 		}
 
-		void createDescriptorPool() {
+		void createDescriptorPool()
+		{
 			std::array<VkDescriptorPoolSize, 2> poolSizes = {};
 			poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			poolSizes[0].descriptorCount = 1;
@@ -1168,7 +1193,7 @@ std::cout << "end bottelnecks" << std::endl;
 
 			VkDescriptorPoolCreateInfo poolInfo = {};
 			poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			poolInfo.poolSizeCount = static_cast<int>(poolSizes.size());
+			poolInfo.poolSizeCount = poolSizes.size();
 			poolInfo.pPoolSizes = poolSizes.data();
 			poolInfo.maxSets = 1;
 
@@ -1176,7 +1201,8 @@ std::cout << "end bottelnecks" << std::endl;
 				throw std::runtime_error("failed to create descriptor pool!");
 		}
 
-		void createDescriptorSet() {
+		void createDescriptorSet()
+		{
 			VkDescriptorSetLayout layouts[] = { descriptorSetLayout };
 			VkDescriptorSetAllocateInfo allocInfo = {};
 			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -1215,7 +1241,7 @@ std::cout << "end bottelnecks" << std::endl;
 			descriptorWrites[1].descriptorCount = 1;
 			descriptorWrites[1].pImageInfo = &imageInfo;
 
-			vkUpdateDescriptorSets(device, static_cast<int>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+			vkUpdateDescriptorSets(device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 		}
 
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VDeleter<VkBuffer>& buffer, VDeleter<VkDeviceMemory>& bufferMemory)
@@ -1278,7 +1304,8 @@ std::cout << "end bottelnecks" << std::endl;
 			vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 		}
 
-		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+		{
 			VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 			VkBufferCopy copyRegion = {};
@@ -1366,17 +1393,25 @@ std::cout << "end bottelnecks" << std::endl;
 
 			if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, imageAvailableSemaphore.replace()) != VK_SUCCESS ||
 				vkCreateSemaphore(device, &semaphoreInfo, nullptr, renderFinishedSemaphore.replace()) != VK_SUCCESS)
-			{
 				throw std::runtime_error("failed to create semaphores!");
-			}
 		}
 
 		void updateUniformBuffer()
 		{
+			//static auto startTime = std::chrono::high_resolution_clock::now();
+
+			//auto currentTime = std::chrono::high_resolution_clock::now();
+			//float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
+
+			//UniformBufferObject ubo = {};
+			//ubo.model = glm::rotate(glm::mat4(), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			//ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+			//ubo.proj[1][1] *= -1;
 			UniformBufferObject ubo;
 			ubo.model = glm::mat4(1.f);
 			ubo.view = glm::mat4(1.f);
-			ubo.proj = glm::mat4(-1, 0, 0, 0,	0, 1, 0, 0,	  0, 0, 1, 0,	0, 0, 0, 1);
+			ubo.proj = glm::mat4(-1, 0, 0, 0,   0, 1, 0, 0,   0, 0, 1, 0,   0, 0, 0, 1);
 
 			void* data;
 			vkMapMemory(device, uniformStagingBufferMemory, 0, sizeof(ubo), 0, &data);
@@ -1650,7 +1685,8 @@ std::cout << "end bottelnecks" << std::endl;
 		}
 };
 
-int main() {
+int main()
+{
 	auto result = EXIT_SUCCESS;
 	VulkanBlendingApplication app;
 
