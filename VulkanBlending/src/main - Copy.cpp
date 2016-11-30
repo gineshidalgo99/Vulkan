@@ -1685,7 +1685,8 @@
 //		}
 //};
 //
-//int main() {
+//int main()
+//{
 //	auto result = EXIT_SUCCESS;
 //	VulkanBlendingApplication app;
 //
