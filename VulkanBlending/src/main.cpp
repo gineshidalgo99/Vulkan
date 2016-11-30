@@ -200,7 +200,7 @@ const std::vector<Vertex> vertices = {
 
 const std::vector<uint16_t> indices = {
 	0, 1, 2, 2, 3, 0,
-	4, 5, 6, 6, 7, 4
+	4, 5, 6, 6, 7, 4,
 };
 
 class VulkanBlendingApplication
@@ -1411,7 +1411,7 @@ std::cout << "end bottelnecks" << std::endl;
 			UniformBufferObject ubo;
 			ubo.model = glm::mat4(1.f);
 			ubo.view = glm::mat4(1.f);
-			ubo.proj = glm::mat4(-1, 0, 0, 0,   0, 1, 0, 0,   0, 0, 1, 0,   0, 0, 0, 1);
+			ubo.proj = glm::mat4(-1, 0, 0, 0,	0, 1, 0, 0,	  0, 0, 1, 0,	0, 0, 0, 1);
 
 			void* data;
 			vkMapMemory(device, uniformStagingBufferMemory, 0, sizeof(ubo), 0, &data);
