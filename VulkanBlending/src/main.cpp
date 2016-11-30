@@ -312,7 +312,6 @@ std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::
 			createRenderPass();
 			createDescriptorSetLayout();
 			createGraphicsPipeline();
-			createFramebuffers();
 			createCommandPool();
 std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << std::endl;
 			createDepthResources();
