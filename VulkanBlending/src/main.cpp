@@ -6,7 +6,6 @@
 #define GLM_FORCE_INLINE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -58,27 +57,33 @@ class VDeleter
 	public:
 		VDeleter() : VDeleter([](T, VkAllocationCallbacks*) {}) {}
 
-		VDeleter(std::function<void(T, VkAllocationCallbacks*)> deletef) {
+		VDeleter(std::function<void(T, VkAllocationCallbacks*)> deletef)
+		{
 			this->deleter = [=](T obj) { deletef(obj, nullptr); };
 		}
 
-		VDeleter(const VDeleter<VkInstance>& instance, std::function<void(VkInstance, T, VkAllocationCallbacks*)> deletef) {
+		VDeleter(const VDeleter<VkInstance>& instance, std::function<void(VkInstance, T, VkAllocationCallbacks*)> deletef)
+		{
 			this->deleter = [&instance, deletef](T obj) { deletef(instance, obj, nullptr); };
 		}
 
-		VDeleter(const VDeleter<VkDevice>& device, std::function<void(VkDevice, T, VkAllocationCallbacks*)> deletef) {
+		VDeleter(const VDeleter<VkDevice>& device, std::function<void(VkDevice, T, VkAllocationCallbacks*)> deletef)
+		{
 			this->deleter = [&device, deletef](T obj) { deletef(device, obj, nullptr); };
 		}
 
-		~VDeleter() {
+		~VDeleter()
+		{
 			cleanup();
 		}
 
-		const T* operator &() const {
+		const T* operator &() const
+		{
 			return &object;
 		}
 
-		T* replace() {
+		T* replace()
+		{
 			cleanup();
 			return &object;
 		}
@@ -87,8 +92,10 @@ class VDeleter
 			return object;
 		}
 
-		void operator=(T rhs) {
-			if (rhs != object) {
+		void operator=(T rhs)
+		{
+			if (rhs != object)
+			{
 				cleanup();
 				object = rhs;
 			}
@@ -117,7 +124,8 @@ struct QueueFamilyIndices
 	int graphicsFamily = -1;
 	int presentFamily = -1;
 
-	bool isComplete() {
+	bool isComplete()
+	{
 		return graphicsFamily >= 0 && presentFamily >= 0;
 	}
 };
@@ -283,6 +291,7 @@ class VulkanBlendingApplication
 			glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 			glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 			window = glfwCreateWindow(mode->width, mode->height, "Vulkan", monitor, NULL);
+			// End no full vs. full screen mode
 
 			glfwSetWindowUserPointer(window, this);
 			glfwSetWindowSizeCallback(window, VulkanBlendingApplication::onWindowResized);
@@ -861,7 +870,7 @@ std::cout << "end bottelnecks" << std::endl;
 		VkFormat findDepthFormat()
 		{
 			return findSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+				{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 				VK_IMAGE_TILING_OPTIMAL,
 				VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
 				);
