@@ -20,6 +20,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "VulkanDeleteClassWrapper.h"
+//#include "VulkanIteration.h"
 #include "VulkanStructs.h"
 #include "VulkanUtilities.h"
 
@@ -72,9 +73,13 @@ class VulkanApplication
 	public:
 		void run()
 		{
+			//for (auto i = 0; i < 2; i++)
+			//{
 			initWindow();
 			initVulkan();
 			mainLoop();
+			//cleanup();
+			//}
 		}
 
 	private:
@@ -131,6 +136,50 @@ class VulkanApplication
 		VulkanDeleteClassWrapper<VkSemaphore> imageAvailableSemaphore{ device, vkDestroySemaphore };
 		VulkanDeleteClassWrapper<VkSemaphore> renderFinishedSemaphore{ device, vkDestroySemaphore };
 
+		//void cleanup()
+		//{
+		//	renderFinishedSemaphore.cleanup();
+		//	imageAvailableSemaphore.cleanup();
+
+		//	descriptorPool.cleanup();
+
+		//	uniformBufferMemory.cleanup();
+		//	uniformBuffer.cleanup();
+		//	uniformStagingBufferMemory.cleanup();
+		//	uniformStagingBuffer.cleanup();
+
+		//	indexBufferMemory.cleanup();
+		//	indexBuffer.cleanup();
+		//	vertexBufferMemory.cleanup();
+		//	vertexBuffer.cleanup();
+
+		//	textureSampler.cleanup();
+		//	textureImageView.cleanup();
+		//	textureImageMemory.cleanup();
+		//	textureImage.cleanup();
+
+		//	depthImageView.cleanup();
+		//	depthImageMemory.cleanup();
+		//	depthImage.cleanup();
+
+		//	commandPool.cleanup();
+
+		//	graphicsPipeline.cleanup();
+		//	pipelineLayout.cleanup();
+		//	descriptorSetLayout.cleanup();
+		//	renderPass.cleanup();
+
+		//	swapChainFramebuffers.clear();
+		//	swapChainImageViews.clear();
+		//	swapChain.cleanup();
+
+		//	device.cleanup();
+
+		//	surface.cleanup();
+		//	callback.cleanup();
+		//	instance.cleanup();
+		//}
+
 		void initWindow()
 		{
 			glfwInit();
@@ -158,7 +207,7 @@ class VulkanApplication
 const auto beginClock = std::chrono::high_resolution_clock::now();
 std::cout << "init bottelnecks" << std::endl;
 			createInstance();
-std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << std::endl;
+std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << " ";
 			setupDebugCallback();
 			createSurface();
 			pickPhysicalDevice();
@@ -169,12 +218,12 @@ std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::
 			createDescriptorSetLayout();
 			createGraphicsPipeline();
 			createCommandPool();
-std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << std::endl;
+std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << " ";
 			createDepthResources();
 			createFramebuffers();
-std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << std::endl;
+std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << " ";
 			createTextureImage();
-std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << std::endl;
+std::cout << (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - beginClock).count() * 1e-6) << " ";
 			createTextureImageView();
 			createTextureSampler();
 			createVertexBuffer();
