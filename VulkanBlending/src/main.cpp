@@ -140,7 +140,7 @@ struct SwapChainSupportDetails
 struct Vertex
 {
 	glm::vec3 pos;
-	glm::vec3 color;
+	glm::vec4 color;
 	glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription()
@@ -185,15 +185,15 @@ struct UniformBufferObject
 
 const std::vector<Vertex> vertices = {
 	// Image 1
-	{ { -1.f, -1.f, -0.002f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
-	{ { 1.f, -1.f, -0.002f },{ 0.0f, 1.0f, 0.0f },{ 0.5f, 1.0f } },
-	{ { 1.f, 1.f, -0.002f },{ 0.0f, 0.0f, 1.0f },{ 0.5f, 0.0f } },
-	{ { -1.f, 1.f, -0.002f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 0.0f } },
+	{ { -1.f, -1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
+	{ { 1.f, -1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
+	{ { 1.f, 1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
+	{ { -1.f, 1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
 	// Image 2
-	{ { -0.5f, -1.f, -0.001f },{ 1.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
-	{ { 0.5f, -1.f, -0.001f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 1.0f } },
-	{ { 0.5f, 1.f, -0.001f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 0.0f } },
-	{ { -0.5f, 1.f, -0.001f },{ 1.0f, 1.0f, 1.0f },{ 0.5f, 0.0f } },
+	{ { -1.f, -1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
+	{ { 1.f, -1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } },
+	{ { 1.f, 1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } },
+	{ { -1.f, 1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
 };
 
 const std::vector<uint16_t> indices = {
@@ -751,7 +751,13 @@ std::cout << "end bottelnecks" << std::endl;
 
 			VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 			colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-			colorBlendAttachment.blendEnable = VK_FALSE;
+			colorBlendAttachment.blendEnable = VK_TRUE;
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
 			VkPipelineColorBlendStateCreateInfo colorBlending = {};
 			colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -890,13 +896,9 @@ std::cout << "end bottelnecks" << std::endl;
 			{
 				for (auto y = 0; y < imageWithMask.rows; y++)
 				{
-					//imageWithMask.at<cv::Vec4b>(x, y)[3] = (int)std::round(255.* x / (double)imageWithMask.cols);
-					//imageWithMask.at<cv::Vec4b>(x, y)[2] = 0;
-					imageWithMask.at<cv::Vec4b>(x, y)[3] = 0;
+					imageWithMask.at<cv::Vec4b>(x, y)[3] = (int)std::round(255.* x / (double)imageWithMask.cols);
 				}
-				//std::cout << (int)imageWithMask.at<cv::Vec4b>(x, 50)[3] << " ";
 			}
-			//std::cout << std::endl;
 		}
 
 		void createTextureImage()
