@@ -34,7 +34,7 @@ int main()
 		result = { EXIT_FAILURE };
 	}
 
-	//if (result != EXIT_SUCCESS)
+	if (result != EXIT_SUCCESS)
 		system("pause");
 	return result;
 }

@@ -45,9 +45,9 @@ private:
 			if (!m_pixelsRGBA1.empty() && !m_pixelsRGBA2.empty())
 			{
 				setMask(m_pixelsRGBA2);
-				cv::Mat pixelsRGBA{ m_pixelsRGBA1.rows, m_pixelsRGBA1.cols + m_pixelsRGBA2.cols, m_pixelsRGBA1.type() };
+				cv::Mat pixelsRGBA{ m_pixelsRGBA1.rows + m_pixelsRGBA2.rows, m_pixelsRGBA1.cols, m_pixelsRGBA1.type() };
 				m_pixelsRGBA1.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ 0, 0, m_pixelsRGBA1.cols, m_pixelsRGBA1.rows } });
-				m_pixelsRGBA2.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ m_pixelsRGBA1.cols, 0, m_pixelsRGBA2.cols, m_pixelsRGBA2.rows } });
+				m_pixelsRGBA2.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ 0, m_pixelsRGBA1.rows, m_pixelsRGBA2.cols, m_pixelsRGBA2.rows } });
 
 				const std::lock_guard<std::mutex> lock(*sp_finalFrameMutex);
 				if (sp_finalFrame->empty())
@@ -76,7 +76,8 @@ private:
 
 	void setMask(cv::Mat & imageWithMask) const
 	{
-		if (rand() % 2 == 1)
+		if (true)
+		//if (rand() % 2 == 1)
 		{
 			for (auto y = 0; y < imageWithMask.rows; y++)
 			{

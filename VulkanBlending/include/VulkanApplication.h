@@ -51,20 +51,20 @@ const auto enableValidationLayers = false;
 const auto enableValidationLayers = true;
 #endif
 
-const std::vector<Vertex> vertices = {
+const std::vector<Vertex> s_vertices = {
 	// Image 1
-	{ { -1.f, -1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
-	{ { 1.f, -1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
-	{ { 1.f, 1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
+	{ { -1.f, -1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 0.5f } },
+	{ { 1.f, -1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.f, 0.5f } },
+	{ { 1.f, 1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.f, 0.0f } },
 	{ { -1.f, 1.f, -0.002f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } },
 	// Image 2
-	{ { -1.f, -1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },
+	{ { -1.f, -1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },
 	{ { 1.f, -1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } },
-	{ { 1.f, 1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } },
-	{ { -1.f, 1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } },
+	{ { 1.f, 1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 1.0f, 0.5f } },
+	{ { -1.f, 1.f, -0.001f },{ 0.0f, 0.0f, 0.0f, 0.0f },{ 0.0f, 0.5f } },
 };
 
-const std::vector<uint16_t> indices = {
+const std::vector<uint16_t> s_indices = {
 	0, 1, 2, 2, 3, 0,
 	4, 5, 6, 6, 7, 4,
 };
@@ -205,17 +205,14 @@ private:
 			if (!newImageAvailable)
 			{
 				const std::lock_guard<std::mutex> lock(*sp_finalFrameMutex);
-				newImageAvailable = !sp_finalFrame->empty();
+				newImageAvailable = { !sp_finalFrame->empty() };
 			}
 			// Loading new image
 			if (newImageAvailable)
 			{
-				const auto beginClockTemp = std::chrono::high_resolution_clock::now();
 				vkDeviceWaitIdle(device);
-
 				createTextureImage();
 				createTextureImageView();
-
 				createDescriptorPool();
 				createDescriptorSet();
 				createCommandBuffers();
@@ -356,10 +353,10 @@ private:
 
 	void createLogicalDevice()
 	{
-		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+		QueueFamilyIndices s_indices = findQueueFamilies(physicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<int> uniqueQueueFamilies = { indices.graphicsFamily, indices.presentFamily };
+		std::set<int> uniqueQueueFamilies = { s_indices.graphicsFamily, s_indices.presentFamily };
 
 		float queuePriority = 1.0f;
 		for (int queueFamily : uniqueQueueFamilies)
@@ -396,8 +393,8 @@ private:
 		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, device.replace()) != VK_SUCCESS)
 			throw std::runtime_error{ " failed to create logical device!" };
 
-		vkGetDeviceQueue(device, indices.graphicsFamily, 0, &graphicsQueue);
-		vkGetDeviceQueue(device, indices.presentFamily, 0, &presentQueue);
+		vkGetDeviceQueue(device, s_indices.graphicsFamily, 0, &graphicsQueue);
+		vkGetDeviceQueue(device, s_indices.presentFamily, 0, &presentQueue);
 	}
 
 	void createSwapChain()
@@ -423,10 +420,10 @@ private:
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
-		uint32_t queueFamilyIndices[] = { VulkanUtilities::sizeTToUint32T(indices.graphicsFamily), VulkanUtilities::sizeTToUint32T(indices.presentFamily) };
+		QueueFamilyIndices s_indices = findQueueFamilies(physicalDevice);
+		uint32_t queueFamilyIndices[] = { VulkanUtilities::sizeTToUint32T(s_indices.graphicsFamily), VulkanUtilities::sizeTToUint32T(s_indices.presentFamily) };
 
-		if (indices.graphicsFamily != indices.presentFamily)
+		if (s_indices.graphicsFamily != s_indices.presentFamily)
 		{
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 			createInfo.queueFamilyIndexCount = 2;
@@ -996,7 +993,7 @@ private:
 
 	void createVertexBuffer()
 	{
-		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+		VkDeviceSize bufferSize = sizeof(s_vertices[0]) * s_vertices.size();
 
 		VulkanDeleteClassWrapper<VkBuffer> stagingBuffer{ device, vkDestroyBuffer };
 		VulkanDeleteClassWrapper<VkDeviceMemory> stagingBufferMemory{ device, vkFreeMemory };
@@ -1004,7 +1001,7 @@ private:
 
 		void* data;
 		vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, vertices.data(), VulkanUtilities::sizeTToUint32T(bufferSize));
+		memcpy(data, s_vertices.data(), VulkanUtilities::sizeTToUint32T(bufferSize));
 		vkUnmapMemory(device, stagingBufferMemory);
 
 		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
@@ -1014,7 +1011,7 @@ private:
 
 	void createIndexBuffer()
 	{
-		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+		VkDeviceSize bufferSize = sizeof(s_indices[0]) * s_indices.size();
 
 		VulkanDeleteClassWrapper<VkBuffer> stagingBuffer{ device, vkDestroyBuffer };
 		VulkanDeleteClassWrapper<VkDeviceMemory> stagingBufferMemory{ device, vkFreeMemory };
@@ -1022,7 +1019,7 @@ private:
 
 		void* data;
 		vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, indices.data(), VulkanUtilities::sizeTToUint32T(bufferSize));
+		memcpy(data, s_indices.data(), VulkanUtilities::sizeTToUint32T(bufferSize));
 		vkUnmapMemory(device, stagingBufferMemory);
 
 		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
@@ -1232,7 +1229,7 @@ private:
 
 			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
-			vkCmdDrawIndexed(commandBuffers[i], VulkanUtilities::sizeTToUint32T(indices.size()), 1, 0, 0, 0);
+			vkCmdDrawIndexed(commandBuffers[i], VulkanUtilities::sizeTToUint32T(s_indices.size()), 1, 0, 0, 0);
 
 			vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -1408,7 +1405,7 @@ private:
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-		QueueFamilyIndices indices = findQueueFamilies(device);
+		QueueFamilyIndices s_indices = findQueueFamilies(device);
 
 		bool extensionsSupported = checkDeviceExtensionSupport(device);
 
@@ -1419,7 +1416,7 @@ private:
 			swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 		}
 
-		return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && indices.isComplete() && extensionsSupported && swapChainAdequate;
+		return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && s_indices.isComplete() && extensionsSupported && swapChainAdequate;
 	}
 
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device) const
@@ -1440,7 +1437,7 @@ private:
 
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const
 	{
-		QueueFamilyIndices indices;
+		QueueFamilyIndices s_indices;
 
 		uint32_t queueFamilyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -1452,21 +1449,21 @@ private:
 		for (const auto& queueFamily : queueFamilies)
 		{
 			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-				indices.graphicsFamily = i;
+				s_indices.graphicsFamily = i;
 
 			VkBool32 presentSupport = false;
 			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 
 			if (queueFamily.queueCount > 0 && presentSupport)
-				indices.presentFamily = i;
+				s_indices.presentFamily = i;
 
-			if (indices.isComplete())
+			if (s_indices.isComplete())
 				break;
 
 			i++;
 		}
 
-		return indices;
+		return s_indices;
 	}
 
 	std::vector<const char*> getRequiredExtensions() const
