@@ -1,13 +1,27 @@
+#include <memory>
+#include <mutex>
+#include <opencv2/opencv.hpp>
+#include "OpenCvProcessing.h"
 #include "VulkanApplication.h"
 
 int main()
 {
 	auto result = EXIT_SUCCESS;
-	VulkanApplication vulkanApplication;
 
 	try
 	{
+		// Parameters
+		const auto fps = 60.;
+		const auto microsecondsPerFrame = 1e6 / (fps * 1.05);
+
+		// Variables
+		auto sp_finalFrame(std::make_shared<cv::Mat>());
+		auto sp_finalFrameMutex(std::make_shared<std::mutex>());
+		std::unique_ptr<OpenCvProcessing> openCvProcessingUniquePtr{ new OpenCvProcessing{ microsecondsPerFrame, sp_finalFrame, sp_finalFrameMutex} };
+		VulkanApplication vulkanApplication{ microsecondsPerFrame, sp_finalFrame, sp_finalFrameMutex };
+
 		vulkanApplication.run();
+		openCvProcessingUniquePtr.reset();
 	}
 	catch (const std::runtime_error & e)
 	{
@@ -20,7 +34,7 @@ int main()
 		result = { EXIT_FAILURE };
 	}
 
-	if (result != EXIT_SUCCESS)
+	//if (result != EXIT_SUCCESS)
 		system("pause");
 	return result;
 }
