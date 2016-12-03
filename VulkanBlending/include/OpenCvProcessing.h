@@ -1,62 +1,93 @@
 #ifndef OPEN_CV_PROCESSING_H
 #define OPEN_CV_PROCESSING_H
 
-#include <atomic>
-#include <memory>
-#include <mutex>
-#include <thread>
 #include <opencv2/opencv.hpp>
+#include "FramesProducer.h"
 #include "Utilities.h"
+
+const auto modeVideo = true;
 
 class OpenCvProcessing
 {
 public:
-	OpenCvProcessing(const double microsecondsPerFrame, const std::shared_ptr<cv::Mat> & finalFrameSharedPtr, const std::shared_ptr<std::mutex> & finalFrameMutexSharedPtr) :
-		m_microsecondsPerFrame{ microsecondsPerFrame },
-		sp_finalFrame{ finalFrameSharedPtr },
-		sp_finalFrameMutex{ finalFrameMutexSharedPtr }
+	OpenCvProcessing() :
+		m_framesProducer{"0", FramesProducer::FrameMirrorMode::NoMirrored, FramesProducer::FrameRotation::Degrees0}
 	{
-		// Load images
-		m_pixelsRGBA1 = { readImageFromFile("textures/texture1.jpg") };
+		// Loading face to swap
+		if (!modeVideo)
+			m_pixelsRGBA1 = { readImageFromFile("textures/texture1.jpg") };
 		m_pixelsRGBA2 = { readImageFromFile("textures/texture2.jpg") };
-
-		m_thread = { std::thread(&OpenCvProcessing::threadFunction, this) };
+		// To check mask
+		//m_pixelsRGBA1.setTo(0);
+		//m_pixelsRGBA2.setTo(255);
 	}
-	~OpenCvProcessing()
+
+	cv::Mat getNextImage()
 	{
-		closeAndJoinWorkThread();
+		cv::Mat pixelsRGBA;
+
+		auto frameState = FramesProducer::FrameState::OK;
+		if (modeVideo)
+			std::tie(frameState, m_pixelsRGBA1) = m_framesProducer.getValidFrame();
+
+		if (frameState == FramesProducer::FrameState::OK && !m_pixelsRGBA1.empty() && !m_pixelsRGBA2.empty())
+		{
+			// BGR to RGBA
+			if (modeVideo)
+				cv::cvtColor(m_pixelsRGBA1, m_pixelsRGBA1, CV_BGR2RGBA);
+
+			if (m_pixelsRGBA1.size() != m_pixelsRGBA2.size())
+				cv::resize(m_pixelsRGBA2, m_pixelsRGBA2, m_pixelsRGBA1.size(), 0.0, 0.0, CV_INTER_AREA);
+
+			setMask(m_pixelsRGBA2, { m_pixelsRGBA2.cols / 2 - 100, m_pixelsRGBA2.rows / 2 - 100, 200, 200 });
+			pixelsRGBA = cv::Mat{ m_pixelsRGBA1.rows + m_pixelsRGBA2.rows, m_pixelsRGBA1.cols, m_pixelsRGBA1.type() };
+			m_pixelsRGBA1.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ 0, 0, m_pixelsRGBA1.cols, m_pixelsRGBA1.rows } });
+			m_pixelsRGBA2.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ 0, m_pixelsRGBA1.rows, m_pixelsRGBA2.cols, m_pixelsRGBA2.rows } });
+		}
+
+		return pixelsRGBA;
 	}
 
 private:
-	const double m_microsecondsPerFrame;
 	cv::Mat m_pixelsRGBA1;
 	cv::Mat m_pixelsRGBA2;
-	std::shared_ptr<cv::Mat> sp_finalFrame;
-	std::shared_ptr<std::mutex> sp_finalFrameMutex;
-	std::thread m_thread;
-	std::atomic<bool> m_stopAndCloseThread;
+	FramesProducer m_framesProducer;
 
-	void threadFunction()
+	void setMask(cv::Mat & imageWithMask, const cv::Rect & faceLocation) const
 	{
-		while (!m_stopAndCloseThread)
+		const cv::Point faceCenter{ (int)std::round((faceLocation.x + faceLocation.width) / 2.f),
+									(int)std::round((faceLocation.y + faceLocation.height) / 2.f) };
+		const auto usingFace = true;
+		if (usingFace)
 		{
-			auto clockIteration = std::chrono::high_resolution_clock::now();
-
-			if (!m_pixelsRGBA1.empty() && !m_pixelsRGBA2.empty())
+			const auto maximum = 1.25 * std::sqrt(faceLocation.width * faceLocation.width + faceLocation.height * faceLocation.height);
+			const auto minimum = 0.7 * std::min(faceLocation.width, faceLocation.height);
+			for (auto y = 0; y < imageWithMask.rows; y++)
 			{
-				setMask(m_pixelsRGBA2);
-				cv::Mat pixelsRGBA{ m_pixelsRGBA1.rows + m_pixelsRGBA2.rows, m_pixelsRGBA1.cols, m_pixelsRGBA1.type() };
-				m_pixelsRGBA1.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ 0, 0, m_pixelsRGBA1.cols, m_pixelsRGBA1.rows } });
-				m_pixelsRGBA2.copyTo(cv::Mat{ pixelsRGBA, cv::Rect{ 0, m_pixelsRGBA1.rows, m_pixelsRGBA2.cols, m_pixelsRGBA2.rows } });
-
-				const std::lock_guard<std::mutex> lock(*sp_finalFrameMutex);
-				if (sp_finalFrame->empty())
-					std::swap(*sp_finalFrame, pixelsRGBA);
+				const auto yL2Norm = (faceCenter.y - y)*(faceCenter.y - y);
+				for (auto x = 0; x < imageWithMask.cols; x++)
+				{
+					const auto l2Norm = std::sqrt((faceCenter.x - x)*(faceCenter.x - x) + yL2Norm);
+					if (l2Norm >= maximum)
+						imageWithMask.at<cv::Vec4b>(y, x)[3] = { 0 };
+					else if (l2Norm <= minimum)
+						imageWithMask.at<cv::Vec4b>(y, x)[3] = { 255 };
+					else
+						imageWithMask.at<cv::Vec4b>(y, x)[3] = (uchar)std::round(255 * 0.5 * (1 + std::cos(3. * (l2Norm - minimum) / (maximum - minimum))));
+				}
 			}
-
-			const auto inverseFpsUs = Utilities::sleepGraphicsThreadIfRequired(m_microsecondsPerFrame, clockIteration);
-//std::cout << "2nd Thread = " << inverseFpsUs / 1e3 << "ms" << std::endl;
-			inverseFpsUs;
+		}
+		else
+		{
+			if (true)
+				//if (rand() % 2 == 1)
+				for (auto y = 0; y < imageWithMask.rows; y++)
+					for (auto x = 0; x < imageWithMask.cols; x++)
+						imageWithMask.at<cv::Vec4b>(y, x)[3] = (int)std::round(255.* x / (double)imageWithMask.cols);
+			else
+				for (auto y = 0; y < imageWithMask.rows; y++)
+					for (auto x = 0; x < imageWithMask.cols; x++)
+						imageWithMask.at<cv::Vec4b>(y, x)[3] = 1;
 		}
 	}
 
@@ -72,38 +103,6 @@ private:
 		cv::cvtColor(pixelsBGR, pixelsRGBA, CV_BGR2RGBA);
 
 		return pixelsRGBA;
-	}
-
-	void setMask(cv::Mat & imageWithMask) const
-	{
-		if (true)
-		//if (rand() % 2 == 1)
-		{
-			for (auto y = 0; y < imageWithMask.rows; y++)
-			{
-				for (auto x = 0; x < imageWithMask.cols; x++)
-				{
-					imageWithMask.at<cv::Vec4b>(y, x)[3] = (int)std::round(255.* x / (double)imageWithMask.cols);
-				}
-			}
-		}
-		else
-		{
-			for (auto y = 0; y < imageWithMask.rows; y++)
-			{
-				for (auto x = 0; x < imageWithMask.cols; x++)
-				{
-					imageWithMask.at<cv::Vec4b>(y, x)[3] = 1;
-				}
-			}
-		}
-	}
-	void closeAndJoinWorkThread()
-	{
-		// Pause and later stop work thread
-		m_stopAndCloseThread = { true };
-		if (m_thread.joinable())
-			m_thread.join();
 	}
 };
 

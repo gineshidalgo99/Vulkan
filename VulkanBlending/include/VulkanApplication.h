@@ -168,6 +168,9 @@ private:
 
 	void initVulkan()
 	{
+		while (!checkIfNewImage())
+			std::this_thread::sleep_for(std::chrono::microseconds{ 100 });
+
 		createInstance();
 		setupDebugCallback();
 		createSurface();
@@ -194,21 +197,21 @@ private:
 		updateUniformBuffer();
 	}
 
+	inline bool checkIfNewImage()
+	{
+		// Detecting whether new image is available
+		const std::lock_guard<std::mutex> lock(*sp_finalFrameMutex);
+		return { !sp_finalFrame->empty() };
+	}
+
 	void mainLoop()
 	{
 		while (!glfwWindowShouldClose(window))
 		{
 			const auto clockIteration = std::chrono::high_resolution_clock::now();
 
-			// Detecting whether new image is available
-			auto newImageAvailable = false;
-			if (!newImageAvailable)
-			{
-				const std::lock_guard<std::mutex> lock(*sp_finalFrameMutex);
-				newImageAvailable = { !sp_finalFrame->empty() };
-			}
 			// Loading new image
-			if (newImageAvailable)
+			if (checkIfNewImage())
 			{
 				vkDeviceWaitIdle(device);
 				createTextureImage();
@@ -237,7 +240,7 @@ private:
 			//glfwPollEvents();	// Process all queued events
 
 			// Loop total time
-			const auto loopTotalTimeMs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - clockIteration).count() * 1e-3);
+			const auto loopTotalTimeUs = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - clockIteration).count() * 1e-3);
 
 			//// Verbose - cout times
 			////std::cout << durationInnerLoopUs << "\n";
@@ -245,8 +248,8 @@ private:
 			////std::cout << otherEventsTimeUs << "\n";
 			////std::cout << durationSoFarUs << "\n";
 			////std::cout << timeToSleepUs << "\n";
-			//std::cout << "loop total time ms = " << loopTotalTimeMs << "\n" << std::endl;
-			////std::cout << "loop total time ms = " << loopTotalTimeMs << std::endl;
+			//std::cout << "loop total time ms = " << loopTotalTimeUs * 1e-3 << "\n" << std::endl;
+			////std::cout << "loop total time ms = " << loopTotalTimeUs * 1e-3 << std::endl;
 		}
 
 		vkDeviceWaitIdle(device);

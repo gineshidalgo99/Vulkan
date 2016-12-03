@@ -9,6 +9,7 @@ stable/
 *.dll
 
 # -------------------------------- Personal ignored folders ------------------------------- #
+3rdparty/
 build_windows/
 Eigen/
 models/

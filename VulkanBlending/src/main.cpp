@@ -1,7 +1,7 @@
 #include <memory>
 #include <mutex>
 #include <opencv2/opencv.hpp>
-#include "OpenCvProcessing.h"
+#include "ProcessingThread.h"
 #include "VulkanApplication.h"
 
 int main()
@@ -17,11 +17,14 @@ int main()
 		// Variables
 		auto sp_finalFrame(std::make_shared<cv::Mat>());
 		auto sp_finalFrameMutex(std::make_shared<std::mutex>());
-		std::unique_ptr<OpenCvProcessing> openCvProcessingUniquePtr{ new OpenCvProcessing{ microsecondsPerFrame, sp_finalFrame, sp_finalFrameMutex} };
 		VulkanApplication vulkanApplication{ microsecondsPerFrame, sp_finalFrame, sp_finalFrameMutex };
 
+		// Main loop
+		ProcessingThread processingThread{ microsecondsPerFrame, sp_finalFrame, sp_finalFrameMutex };
 		vulkanApplication.run();
-		openCvProcessingUniquePtr.reset();
+
+		// Stop processing thread
+		processingThread.stop();
 	}
 	catch (const std::runtime_error & e)
 	{
