@@ -240,7 +240,7 @@ std::vector<cv::Point> FramesProducer::getAvailableWebCamResolutions()
 	return{
 		//cv::Point{3840, 2160},     // 4K
 		//cv::Point{2048, 1080},     // 2K
-		//        cv::Point{1920, 1080},       // HD 1080
+//        cv::Point{1920, 1080},       // HD 1080
 		//cv::Point{1280, 1024},     // SXGA
 		//cv::Point{1280, 768},      // WXGA
 		cv::Point{ 1280, 720 },        // HD 720

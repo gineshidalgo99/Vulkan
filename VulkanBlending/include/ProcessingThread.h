@@ -6,7 +6,7 @@
 #include <mutex>
 #include <thread>
 #include <opencv2/opencv.hpp>
-#include "OpenCvProcessing.h"
+#include "FramesProcessing.h"
 #include "Utilities.h"
 
 class ProcessingThread
@@ -30,7 +30,7 @@ public:
 
 private:
 	const double m_microsecondsPerFrame;
-	OpenCvProcessing m_openCvProcessing;
+	FramesProcessing m_framesProcessing;
 	std::shared_ptr<cv::Mat> sp_finalFrame;
 	std::shared_ptr<std::mutex> sp_finalFrameMutex;
 	std::thread m_thread;
@@ -42,7 +42,7 @@ private:
 		{
 			auto clockIteration = std::chrono::high_resolution_clock::now();
 
-			auto pixelsRGBA(m_openCvProcessing.getNextImage());
+			auto pixelsRGBA(m_framesProcessing.getNextImage());
 
 			if (!pixelsRGBA.empty())
 			{
@@ -59,7 +59,6 @@ private:
 
 	void closeAndJoinWorkThread()
 	{
-std::cout << __LINE__ << std::endl;
 		// Pause and later stop work thread
 		m_stopAndCloseThread = { true };
 		if (m_thread.joinable())

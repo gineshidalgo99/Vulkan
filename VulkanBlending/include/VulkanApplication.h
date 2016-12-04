@@ -21,24 +21,23 @@
 #include <opencv2/opencv.hpp>
 
 #include "VulkanDeleteClassWrapper.h"
-//#include "VulkanIteration.h"
 #include "VulkanStructs.h"
 #include "VulkanUtilities.h"
 
 // To see if there are more layers, uncomment lines after: "// Output all available validation layers" 
 const std::vector<const char*> desiredValidationLayers = {
 	"VK_LAYER_LUNARG_standard_validation",
-	//"VK_LAYER_LUNARG_api_dump",	// It just starts printing out weird things
-	"VK_LAYER_LUNARG_core_validation",
-	"VK_LAYER_LUNARG_image",
-	"VK_LAYER_LUNARG_object_tracker",
-	"VK_LAYER_LUNARG_parameter_validation",
-	"VK_LAYER_LUNARG_screenshot",
-	"VK_LAYER_LUNARG_swapchain",
-	"VK_LAYER_GOOGLE_threading",
-	"VK_LAYER_GOOGLE_unique_objects",
-	//"VK_LAYER_LUNARG_vktrace",	// It needs some kind of client/server connection
-	"VK_LAYER_RENDERDOC_Capture",	// It shows fps and allows screenshots
+	//"VK_LAYER_LUNARG_api_dump",		// Print API calls and their parameters and values (it just starts printing out weird things)
+	"VK_LAYER_LUNARG_core_validation",	// Print and validate the descriptor set, pipeline state, and dynamic state; validate the interfaces between SPIR-V modules and the graphics pipeline; track and validate GPU memory and its binding to objects and command buffers
+	"VK_LAYER_LUNARG_image",			// Validate texture formats and render target formats
+	"VK_LAYER_LUNARG_object_tracker",	// Print object create/use/destroy, tracking objects by category
+	"VK_LAYER_LUNARG_parameter_validation",// Validate API parameters
+	"VK_LAYER_LUNARG_screenshot",		// It allows screenshots
+	"VK_LAYER_LUNARG_swapchain",		// Validate the use of the WSI "swapchain" extensions
+	"VK_LAYER_GOOGLE_threading",		// Check validity of multi-threaded API usage
+	"VK_LAYER_GOOGLE_unique_objects",	// Alias all Vulkan objects with a unique handle at create time. This is used during validation to ensure that duplicate object handles are correctly tracked. Note that for optimal efficiency, this layer must be last in the chain (closest to the display driver)
+	//"VK_LAYER_LUNARG_vktrace",		// Need some kind of client/server connection
+	"VK_LAYER_RENDERDOC_Capture",		// Shows fps
 };
 
 const std::vector<const char*> deviceExtensions = {
