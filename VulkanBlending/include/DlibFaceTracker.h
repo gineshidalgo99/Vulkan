@@ -14,7 +14,7 @@ class DlibFaceTracker
 {
 public:
 	DlibFaceTracker(const char* trainFaceModel);
-	std::pair<bool, Landmarks> getFaceLandmarks(const dlib::array2d<dlib::bgr_pixel> & image, dlib::rectangle & previousFaceRect = dlib::rectangle{});
+	std::tuple<bool, Landmarks, dlib::rectangle> getFaceLandmarks(const dlib::array2d<dlib::bgr_pixel> & image, const int offsetX = 0, const int offsetY = 0);
 private:
 	dlib::frontal_face_detector m_faceDetector;
 	dlib::shape_predictor m_sp;

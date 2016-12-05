@@ -14,42 +14,36 @@ DlibFaceTracker::DlibFaceTracker(const char* trainFaceModel) :
 	dlib::deserialize(trainFaceModel) >> m_sp;
 }
 
-std::pair<bool, Landmarks> DlibFaceTracker::getFaceLandmarks(const dlib::array2d<dlib::bgr_pixel> & image, dlib::rectangle & previousFaceRect)
+std::tuple<bool, Landmarks, dlib::rectangle> DlibFaceTracker::getFaceLandmarks(const dlib::array2d<dlib::bgr_pixel> & image, const int offsetX, const int offsetY)
 {
-	auto landmarksFound = true;
+	bool landmarksFound;
 	Landmarks landmarks;
+	dlib::rectangle higherFaceRect;
 
 	// Face detection
-	dlib::rectangle higherFaceRect;
-	if (previousFaceRect == dlib::rectangle{})
+	auto pyrDownRatio = 1;
+	dlib::array2d<dlib::bgr_pixel> imageDown;
+	const auto minMaxSize = (512 * 512);
+	if (image.size() > minMaxSize)
 	{
-std::cout << image.size() << std::endl;
-		auto pyrDownRatio = 1;
-		dlib::array2d<dlib::bgr_pixel> imageDown;
-		if (image.size() > (512 * 512))
-		{
-			m_pyrDown2(image, imageDown);
-			pyrDownRatio *= 2;
-		}
-		while (imageDown.size() > (512 * 512))
-		{
-			m_pyrDown2(imageDown, imageDown);
-			pyrDownRatio *= 2;
-		}
-std::cout << imageDown.size() << std::endl;
-		const auto faceRects(m_faceDetector((pyrDownRatio > 1 ? imageDown : image)));
-
-		if (faceRects.size() > 0)
-		{
-			// Keep only 1 face rect / image (the higher one)
-			higherFaceRect = { keepHigherRectangle(faceRects) };
-
-			// Face detection re-sizing
-			resizeRectangle(pyrDownRatio, higherFaceRect);
-		}
+		m_pyrDown2(image, imageDown);
+		pyrDownRatio *= 2;
 	}
-	else
-		higherFaceRect = { previousFaceRect };
+	while (imageDown.size() > minMaxSize)
+	{
+		m_pyrDown2(imageDown, imageDown);
+		pyrDownRatio *= 2;
+	}
+	const auto faceRects(m_faceDetector((pyrDownRatio > 1 ? imageDown : image)));
+
+	if (faceRects.size() > 0)
+	{
+		// Keep only 1 face rect / image (the higher one)
+		higherFaceRect = { keepHigherRectangle(faceRects) };
+
+		// Face detection re-sizing
+		resizeRectangle(pyrDownRatio, higherFaceRect);
+	}
 
 
 	landmarksFound = { higherFaceRect != dlib::rectangle{} };
@@ -57,50 +51,31 @@ std::cout << imageDown.size() << std::endl;
 	{
 		// Face tracking
 		const auto dlibLandmarks = m_sp(image, higherFaceRect);
-		landmarksFound = (dlibLandmarks.num_parts() > 0);
+		landmarksFound = { dlibLandmarks.num_parts() > 0 };
 
 		if (landmarksFound)
 		{
 			for (unsigned long i = 0; i < dlibLandmarks.num_parts(); ++i)
 			{
-				landmarks[0][i] = dlibLandmarks.part(i)(0, 0);
-				landmarks[1][i] = dlibLandmarks.part(i)(0, 1);
-			}
-
-//for (auto i = 0; i < landmarks.size(); i++)
-//{
-//	for (auto j = 0; j < landmarks[i].size(); j++)
-//		std::cout << landmarks[i][j] << " ";
-//	std::cout << std::endl;
-//}
-
-			// Save previousFaceRect for next iteration
-			//if (previousFaceRect.area() <= 1)
-			{
-				// Get max and min
-				//std::cout << *std::min_element(landmarks[0].begin(), landmarks[0].end()) << std::endl;
-				//std::cout << *std::max_element(landmarks[0].begin(), landmarks[0].end()) << std::endl;
-				const auto constant = 0;
-				previousFaceRect.set_left(-constant + *std::min_element(landmarks[0].begin(), landmarks[0].end()));
-				previousFaceRect.set_right(constant + *std::max_element(landmarks[0].begin(), landmarks[0].end()));
-				previousFaceRect.set_top(-constant + *std::min_element(landmarks[1].begin(), landmarks[1].end()));
-				previousFaceRect.set_bottom(constant + *std::max_element(landmarks[1].begin(), landmarks[1].end()));
-				previousFaceRect = higherFaceRect;
+				landmarks[0][i] = { (float)dlibLandmarks.part(i)(0, 0) + offsetX };
+				landmarks[1][i] = { (float)dlibLandmarks.part(i)(0, 1) + offsetY };
 			}
 		}
-		//else
-			previousFaceRect = { dlib::rectangle{} };
-//std::cout << previousFaceRect << std::endl;
-//previousFaceRect = { dlib::rectangle{} };
-//std::cout << previousFaceRect << std::endl;
-//std::cout << __LINE__ << std::endl;
+		else
+			higherFaceRect = { dlib::rectangle{} };
+	}
+
+	// Add offset
+	if (higherFaceRect != dlib::rectangle{})
+	{
+		higherFaceRect.set_left(higherFaceRect.left() + offsetX);
+		higherFaceRect.set_right(higherFaceRect.right() + offsetX);
+		higherFaceRect.set_top(higherFaceRect.top() + offsetY);
+		higherFaceRect.set_bottom(higherFaceRect.bottom() + offsetY);
 	}
 
 	// Save previousFaceRect for next iteration
-	if (!landmarksFound)
-		previousFaceRect = { dlib::rectangle{} };
-
-	return std::make_pair(landmarksFound, landmarks);
+	return std::make_tuple(landmarksFound, landmarks, higherFaceRect);
 }
 
 void DlibFaceTracker::resizeRectangle(const int factor, dlib::rectangle & rectangle)

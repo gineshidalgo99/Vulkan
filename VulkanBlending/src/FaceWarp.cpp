@@ -15,8 +15,8 @@ std::tuple<cv::Mat, cv::Rect> FaceWarp::face_warp(const cv::Mat & image1, const 
 	std::vector<cv::Point2f> pts_dst(landmarks1[0].size());
     for (auto i = 0; i < pts_src.size(); i++)
     {
-		pts_src[i] = { cv::Point2f{ landmarks1[0][i], landmarks1[1][i] } };
-		pts_dst[i] = { cv::Point2f{ landmarks2[0][i], landmarks2[1][i] } };
+		pts_src[i] = { landmarks1[0][i], landmarks1[1][i] };
+		pts_dst[i] = { landmarks2[0][i], landmarks2[1][i] };
     }
 
 	const auto h = cv::findHomography(pts_src, pts_dst);
@@ -25,16 +25,16 @@ std::tuple<cv::Mat, cv::Rect> FaceWarp::face_warp(const cv::Mat & image1, const 
 
 	// Make faceRect squared
 	cv::Rect dst_rect;
-	if ((maxX_dst - minX_dst)>(maxY_dst - minY_dst))
-		dst_rect = cv::Rect{ (int)std::round(minX_dst), (int)std::round(minY_dst-delta / 2.f), finalWH, finalWH };
+	if ((maxX_dst - minX_dst) > (maxY_dst - minY_dst))
+		dst_rect = { cv::Rect{ (int)std::round(minX_dst), (int)std::round(minY_dst - delta / 2.f), finalWH, finalWH } };
 	else
-		dst_rect = cv::Rect{ (int)std::round(minX_dst-delta / 2.f), (int)std::round(minY_dst), finalWH, finalWH };
+		dst_rect = { cv::Rect{ (int)std::round(minX_dst - delta / 2.f), (int)std::round(minY_dst), finalWH, finalWH } };
 
 	// Perform warping
 	cv::Mat image1Warped;
     cv::warpPerspective(image1, image1Warped,h, image2.size());
 
-	// Illumination normalization
+	// Illumination normalization (only applied over the faceRect and surroundings)
 	const auto increase = 0.175f;
 	const auto x = std::max(0, (int)std::round(dst_rect.x - dst_rect.width * increase));
 	const auto y = std::max(0, (int)std::round(dst_rect.y - dst_rect.height * increase));
