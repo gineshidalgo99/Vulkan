@@ -24,6 +24,8 @@
 #include "VulkanStructs.h"
 #include "VulkanUtilities.h"
 
+const std::string SHADERS_PATH{ "../models/shaders/" };
+
 // To see if there are more layers, uncomment lines after: "// Output all available validation layers" 
 const std::vector<const char*> desiredValidationLayers = {
 	"VK_LAYER_LUNARG_standard_validation",
@@ -550,8 +552,8 @@ private:
 
 	void createGraphicsPipeline()
 	{
-		const auto vertShaderCode(VulkanUtilities::readFile("shaders/vert.spv"));
-		const auto fragShaderCode(VulkanUtilities::readFile("shaders/frag.spv"));
+		const auto vertShaderCode(VulkanUtilities::readFile(SHADERS_PATH + "vert.spv"));
+		const auto fragShaderCode(VulkanUtilities::readFile(SHADERS_PATH + "frag.spv"));
 
 		VulkanDeleteClassWrapper<VkShaderModule> vertShaderModule{ device, vkDestroyShaderModule };
 		VulkanDeleteClassWrapper<VkShaderModule> fragShaderModule{ device, vkDestroyShaderModule };
@@ -790,40 +792,6 @@ private:
 
 		transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
-
-	//		void updateImage()
-	//		{
-	//			int texWidth, texHeight;
-	//			cv::Mat pixelsBGR = cv::imread("textures/texture.jpg");
-	//			if (pixelsBGR.empty())
-	//				throw std::runtime_error{" failed to load texture image!");
-	//			// BGR to RGB
-	//			cv::Mat pixelsRGBA;
-	//			// RGB to RGBA
-	//			cv::cvtColor(pixelsBGR, pixelsRGBA, CV_BGR2RGBA);
-	//			texWidth = pixelsBGR.cols;
-	//			texHeight = pixelsBGR.rows;
-	//			VkDeviceSize imageSize = texWidth * texHeight * 4;
-	//
-	//			//VulkanDeleteClassWrapper<VkImage> stagingImage{ device, vkDestroyImage };
-	//			//VulkanDeleteClassWrapper<VkDeviceMemory> stagingImageMemory{ device, vkFreeMemory };
-	//			//createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingImage, stagingImageMemory);
-	//
-	//			//void* data;
-	//			//vkMapMemory(device, stagingImageMemory, 0, imageSize, 0, &data);
-	//			//memcpy(data, pixelsRGBA.data, VulkanUtilities::sizeTToUint32T(imageSize);
-	//			//vkUnmapMemory(device, stagingImageMemory);
-	//
-	//			//createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-	//
-	//			//transitionImageLayout(stagingImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	//			//transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//			//copyImage(stagingImage, textureImage, texWidth, texHeight);
-	//
-	//			//transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	//
-	//			//recreateSwapChain();
-	//		}
 
 	void createTextureImageView()
 	{

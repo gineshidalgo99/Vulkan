@@ -1,0 +1,5 @@
+Dlib 19.2
+GLFW 3.2.1
+GLM 0.9.8.1
+OpenCV 3.1
+Vulkan 1.0.33.0
